@@ -1,0 +1,4 @@
+run,design,valid_first_try_pct,fallback_pct
+Run 1,Prompt only; LLM sets priority,89,2
+Run 2,Added code checks for unsupported judgments,57,40
+Run 3,Narrowed LLM role; facts filled by code; numbers grounded,98,2

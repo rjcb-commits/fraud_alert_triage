@@ -4,6 +4,14 @@ This project looks at **bank account-opening fraud**: rank a queue of fraud aler
 
 > Synthetic data only (Feedzai BAF / FiFAR). Built to demonstrate fraud-operations analytics and safe AI workflow design, not for real decisions.
 
+**Interactive dashboard (Tableau Public):** [Fraud Alert Triage: Ranking, Reviewers & Guardrailed AI](https://public.tableau.com/app/profile/ray.jack/viz/FraudAlertTriage/1-Queue)
+
+![Same alerts, 50 reviewers](images/2-Reviewers.png)
+
+| Queue | AI triage |
+|---|---|
+| ![Queue](images/1-Queue.png) | ![AI triage](images/3-AITriage.png) |
+
 ## Key results
 
 **1. Ranking the queue matters.** Of 30,622 alerts (12.1% fraud), an investigator working the top 100 by risk score finds **74% fraud**, about **6x** random order (12%).

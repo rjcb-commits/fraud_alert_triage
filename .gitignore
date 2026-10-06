@@ -5,3 +5,9 @@ output/triage_run.txt
 *.pyc
 __pycache__/
 .DS_Store
+mockups/
+TABLEAU_BUILD_GUIDE.md
+tableau/*.twb
+tableau/*.twbx
+tableau/.~*
+portfolio_site_update/
