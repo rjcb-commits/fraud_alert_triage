@@ -6,11 +6,11 @@ This project looks at **bank account-opening fraud**: rank a queue of fraud aler
 
 **Interactive dashboard (Tableau Public):** [Fraud Alert Triage: Ranking, Reviewers & Guardrailed AI](https://public.tableau.com/app/profile/ray.jack/viz/FraudAlertTriage/1-Queue)
 
-![Same alerts, 50 reviewers](images/2-Reviewers.png)
+![Same alerts, 50 reviewers](images/dashboard-reviewers.png)
 
 | Queue | AI triage |
 |---|---|
-| ![Queue](images/1-Queue.png) | ![AI triage](images/3-AITriage.png) |
+| ![Queue](images/dashboard-queue.png) | ![AI triage](images/dashboard-ai-triage.png) |
 
 ## Key results
 
