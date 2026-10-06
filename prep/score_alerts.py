@@ -128,7 +128,7 @@ alerts[keep].to_parquet(OUT / "alerts_scored.parquet", index=False)
 
 auc = roc_auc_score(y, alerts["our_score"]); ap = average_precision_score(y, alerts["our_score"])
 auc0 = roc_auc_score(y, alerts["model_score"])
-card = f"""# Model card: alert-queue re-ranker (portfolio project)
+card = f"""# Model card: alert-queue re-ranker
 
 - Training: {len(train):,} applications from months {sorted(train['month'].unique().tolist())} (fraud rate {base_rate:.2%}); alerts come from months {alert_months} and were never used for training.
 - Alerts: {len(alerts):,} cases, fraud rate {y.mean():.2%}.

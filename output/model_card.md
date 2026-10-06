@@ -1,4 +1,4 @@
-# Model card: alert-queue re-ranker (portfolio project)
+# Model card: alert-queue re-ranker
 
 - Training: 397,039 applications from months [0, 1, 2] (fraud rate 0.98%); alerts come from months [3, 4, 5, 6, 7] and were never used for training.
 - Alerts: 30,622 cases, fraud rate 12.13%.

@@ -1,6 +1,6 @@
 # Fraud Alert Triage: Risk Ranking + a Guardrailed Local AI Assistant
 
-A portfolio project on **bank account-opening fraud**: rank a queue of fraud alerts by risk, explain each alert in plain English, and use a **local LLM** to draft investigator notes, with guardrails that stop the AI from inventing facts and a full audit log. The AI explains; the risk model sets priority; a human decides.
+This project looks at **bank account-opening fraud**: rank a queue of fraud alerts by risk, explain each alert in plain English, and use a **local LLM** to draft investigator notes, with guardrails that stop the AI from inventing facts and a full audit log. The AI explains; the risk model sets priority; a human decides.
 
 > Synthetic data only (Feedzai BAF / FiFAR). Built to demonstrate fraud-operations analytics and safe AI workflow design, not for real decisions.
 
@@ -57,7 +57,7 @@ Run 1 *looked* fine but most summaries called values "low" or "high", which the 
 2. `prep/triage_assistant.py`: the guardrailed LLM assistant (Ollama, `qwen2.5:7b`, temperature 0). A synthetic analyst stands in for the human reviewer.
 3. `prep/build_tableau_tables.py`: tables for the Tableau dashboard (`tableau/`).
 
-Honest note: my XGBoost re-ranker (within-alert AUC 0.659) did **not** beat the dataset's own alert-model score (0.677), so the queue uses the provided score for ranking and my model for explanations.
+My XGBoost re-ranker (within-alert AUC 0.659) did not beat the dataset's own alert-model score (0.677), so the queue ranks by the provided score and uses my model only for explanations.
 
 ## Limitations
 
