@@ -1,0 +1,11 @@
+signal,share_of_apps,fraud_rate,lift_vs_overall
+housing_status=BA,0.1379,0.0351,3.58
+device_distinct_emails_8w>1,0.04,0.0343,3.49
+date_of_birth_distinct_emails_4w<=3,0.0804,0.0281,2.87
+name_email_similarity<0.2,0.2048,0.0177,1.81
+foreign_request=1,0.0276,0.0178,1.81
+keep_alive_session=0,0.391,0.0157,1.6
+prev_address_months_count=-1,0.7055,0.0126,1.28
+phone_home_valid=0,0.602,0.012,1.22
+email_is_free=1,0.562,0.0119,1.21
+device_fraud_count>0,0.0,,
