@@ -34,10 +34,10 @@ But **two-thirds of the fraud sits in low-score alerts** (score < 0.2, where onl
 | MEDIUM | 9 | 33% |
 | LOW | 91 | 12% |
 
-An audit of the accepted notes (`prep/audit_notes.py`) found **21 of 244 (8.6%) still mention a flag the case doesn't have** in the note text, which the checks don't cover: 19 copy "same-ZIP volume" from the prompt's own rule list, and 2 say a date of birth was seen with 1 email when the case says 2. Details in [`output/note_audit.md`](output/note_audit.md).
+An audit of the accepted notes (`prep/audit_notes.py`) found **19 of 244 (7.8%) still mention a flag the case doesn't have** in the note text, which the checks don't cover: all 19 cite "same-ZIP volume", a phrase the model copied from the prompt's own rule list. Details in [`output/note_audit.md`](output/note_audit.md).
 
-Example note (case 559428, random sample, score 0.05, legitimate):
-> Score 0.054, rank 29006 in the queue. Flags: name and email don't match (similarity 0.09); 0.00 days since request; date of birth seen with 3 emails in 4 weeks. *Start with Confirm email ownership: name and email don't match (similarity 0.09). Then Check for linked applications: date of birth seen with 3 emails in 4 weeks.*
+Example note (case 548686, random sample, score 0.07, legitimate):
+> Score 0.073, rank 20148 in the queue. Flags: device OS windows; name and email don't match (similarity 0.11); date of birth seen with 3 emails in 4 weeks. *Start with Confirm email ownership: name and email don't match (similarity 0.11). Then Check for linked applications: date of birth seen with 3 emails in 4 weeks.*
 
 More in [`output/sample_cases.md`](output/sample_cases.md).
 
@@ -54,7 +54,7 @@ Run 1 *looked* fine but most summaries called values "low" or "high", which the 
 ## Guardrails
 
 - **Fixed JSON schema**, one retry, then a deterministic fallback; an unvalidated AI note is never shown.
-- **Grounding:** every signal in the structured `risk_signals` list must match the case's own reason codes, and every number in the note must appear somewhere in the case data. Flags written into the note text are not checked, and the number check is loose (see the audit above).
+- **Grounding:** every signal in the structured `risk_signals` list must match the case's own reason codes, and every number in the note must appear somewhere in the case data. Flags written into the note text are not checked (see the audit above), and the number check only looks for each number somewhere in the case data.
 - **No value judgments** on anonymized fields (high/low/good/bad), enforced by pattern checks.
 - **Approved actions only**; "approve" cannot be combined with investigation steps; an AI approval suggestion on a HIGH-score case is routed to senior review.
 - **Priority comes from the risk model, never the LLM.**
@@ -65,14 +65,14 @@ Run 1 *looked* fine but most summaries called values "low" or "high", which the 
 
 1. `prep/score_alerts.py`: XGBoost trained on months 0-2 (397k applications, never the alert months); scores the 30,622 alerts; per-case **reason codes** from TreeSHAP contributions translated to plain language; queue precision at fixed capacity; signal lift.
 2. `prep/triage_assistant.py`: the guardrailed LLM assistant (Ollama, `qwen2.5:7b`, temperature 0). A synthetic analyst stands in for the human reviewer.
-3. `prep/build_tableau_tables.py`: tables for the Tableau dashboard (`tableau/`).
+3. `prep/build_tableau_tables.py`: tables for the Tableau dashboard (`tableau/`), including `score_bands.csv` for the score-band chart.
 4. `prep/audit_notes.py`: checks the flags in each accepted note's text against the case's reason codes.
 
 My XGBoost re-ranker (within-alert AUC 0.659) did not beat the dataset's own alert-model score (0.677), so the queue ranks by the provided score and uses my model only for explanations.
 
 ## Limitations
 
-- The guardrails check the note's signal list and its numbers, not every flag the note text mentions; 21 of 244 accepted notes cited a flag the case didn't have.
+- The guardrails check the note's signal list and its numbers, not every flag the note text mentions; 19 of 244 accepted notes cited a flag the case didn't have.
 - Synthetic applications and synthetic analysts; some fields are anonymized codes (e.g. housing status "BA"), so several reasons read as codes.
 - The 7B model's notes are formulaic and sometimes pair a check with a flag imprecisely; a larger model or a deterministic flag-to-check map would improve this.
 - Evaluated on 250 cases (150 top-of-queue + 100 random), not the full alert set.

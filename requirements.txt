@@ -1,3 +1,4 @@
+# LLM runs via a local Ollama server (see README > Reproduce); no Python client needed
 duckdb==1.4.5
 numpy==2.0.2
 pandas==2.3.3

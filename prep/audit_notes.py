@@ -12,16 +12,22 @@ import collections, json, pathlib, re
 OUT = pathlib.Path(__file__).resolve().parents[1] / "output"
 FLAG = re.compile(r"(?::|since)\s*([^.]+?)(?:\.|$)")
 
+
+def norm(text):
+    """Lower-case and drop plural 's' so '1 email' and '1 emails' compare equal."""
+    return re.sub(r"(?<=[a-z])s\b", "", text.lower())
+
+
 rows = [json.loads(line) for line in open(OUT / "triage_audit_log.jsonl")]
 accepted = [r for r in rows if r["status"] != "FALLBACK_TEMPLATE"]
 
 unsupported = collections.Counter()
 cases = []
 for r in accepted:
-    codes = [c.lower() for c in r["input"]["reason_codes"]]
+    codes = [norm(c) for c in r["input"]["reason_codes"]]
     note = r["assistant_output"]["investigator_note"]
     flags = [f.strip().rstrip(".") for f in FLAG.findall(note)]
-    missing = [f for f in flags if not any(f.lower() in c or c in f.lower() for c in codes)]
+    missing = [f for f in flags if not any(norm(f) in c or c in norm(f) for c in codes)]
     if missing:
         unsupported.update(missing)
         cases.append((r["input"]["case_id"], missing, r["input"]["reason_codes"]))

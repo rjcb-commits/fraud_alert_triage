@@ -1,12 +1,11 @@
 # Note audit: flags in the note text that are not in the case's reason codes
 
 - Accepted notes: 244
-- Notes citing at least one flag the case does not have: 21 (8.6%)
+- Notes citing at least one flag the case does not have: 19 (7.8%)
 
 | Flag in note | Notes |
 |---|---|
 | same-ZIP volume | 19 |
-| date of birth seen with 1 email in 4 weeks | 2 |
 
 | Case | Unsupported flag(s) | Case reason codes |
 |---|---|---|
@@ -22,9 +21,7 @@
 | 709136 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 338 |
 | 703135 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 283 |
 | 978531 | same-ZIP volume | housing status BA; credit risk score 274; proposed credit limit $2,000 |
-| 447103 | date of birth seen with 1 email in 4 weeks | housing status BA; device used with 2 different emails in 8 weeks; date of birth seen with 1 emails in 4 weeks |
 | 523146 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 286 |
-| 564491 | date of birth seen with 1 email in 4 weeks | housing status BA; device used with 2 different emails in 8 weeks; date of birth seen with 1 emails in 4 weeks |
 | 899348 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 299 |
 | 935807 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 315 |
 | 935738 | same-ZIP volume | housing status BA; proposed credit limit $2,000; credit risk score 317 |
