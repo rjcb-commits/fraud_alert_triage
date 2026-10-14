@@ -6,9 +6,9 @@ a human approves or overrides, and every step is logged for audit.
 
 Guardrails
   * JSON-only output validated against a fixed schema (one retry, then a deterministic fallback).
-  * Grounding check: every signal in the risk_signals list must come from the case's own reason codes,
-    and every number in the note must appear in the case data. Ungrounded output is rejected.
-    Flags written into the note text are not checked here; see prep/audit_notes.py.
+  * Grounding check: every signal in the risk_signals list and every flag written into the note text
+    must come from the case's own reason codes, and every number in the note must appear as a whole
+    number in them (prep/note_checks.py). Ungrounded output is rejected.
   * Suggested checks must come from an approved list.
   * Consistency check: if the LLM's priority disagrees with the score band, the case is flagged
     for senior review instead of being silently accepted.
@@ -19,6 +19,9 @@ Usage: python prep/triage_assistant.py [n_top] [n_random]
 Outputs (output/): triage_audit_log.jsonl, triage_results.parquet, triage_eval.md, sample_cases.md
 """
 import json, hashlib, time, sys, pathlib, datetime, urllib.request, re
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from note_checks import tidy_note, unsupported_flags, unsupported_numbers
 import pandas as pd, numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -43,10 +46,11 @@ Return a single JSON object with exactly these keys:
 Use "Approve with standard monitoring" only by itself, never together with investigation checks.
 Match checks to flags: device or multiple-email flags -> "Review device history"; name/email mismatch ->
 "Confirm email ownership"; phone not valid -> "Verify phone number"; address flags -> "Verify address"; velocity or
-same-ZIP volume -> "Check for linked applications"; anything else -> "Verify identity document".
-Refer to flags using the reason-code wording, never raw field names.
-Example note format (fill in from THIS case only): "Start with <check>: <flag copied from the reason codes>.
-Then <check>, since <another flag copied from the reason codes>."
+same-ZIP application flags -> "Check for linked applications"; anything else -> "Verify identity document".
+The rules above name kinds of flags, not facts about this case: only mention flags that appear in this case's
+reason codes, copied exactly.
+Example note format (fill in from THIS case only): "First, <check in lower case>: <flag copied exactly from the
+reason codes>. Then <check in lower case>: <another flag copied exactly from the reason codes>."
 """
 
 def band(s): return "HIGH" if s >= 0.6 else ("MEDIUM" if s >= 0.3 else "LOW")
@@ -74,9 +78,11 @@ def validate(out, reasons):
     ch = out.get("suggested_checks") or []
     if not (isinstance(ch, list) and 1 <= len(ch) <= 3 and all(c in CHECKS for c in ch)): errs.append("checks")
     if "Approve with standard monitoring" in ch and len(ch) > 1: errs.append("contradictory checks (approve + investigate)")
-    # numeric grounding: every number in the note must appear in this case's reason codes
-    src = " ".join(texts)
-    bad_nums = [n for n in re.findall(r"\d+(?:\.\d+)?", note or "") if n not in src]
+    # note-text grounding: every flag and number written into the note must come from this case's reason codes
+    codes = [r["text"] for r in reasons]
+    off_flags = unsupported_flags(note or "", codes)
+    if off_flags: errs.append(f"note cites flags not in this case {off_flags}")
+    bad_nums = unsupported_numbers(note or "", codes)
     if bad_nums: errs.append(f"numbers not in case facts {bad_nums}")
     judg = JUDGMENT.findall(note or "")
     if judg: errs.append(f"unsupported value judgment {judg}")
@@ -104,7 +110,10 @@ for _, c in cases.iterrows():
     while attempts < 2 and errs:
         attempts += 1
         try:
-            raw = call(msgs); out = json.loads(raw); errs = validate(out, reasons)
+            raw = call(msgs); out = json.loads(raw)
+            if isinstance(out.get("investigator_note"), str):
+                out["investigator_note"] = tidy_note(out["investigator_note"], CHECKS)
+            errs = validate(out, reasons)
         except Exception as e:
             errs = [f"exception {type(e).__name__}"]
         if errs and attempts == 1:
@@ -137,7 +146,7 @@ acc = r[r.status != "FALLBACK_TEMPLATE"]
 lines = [f"# Triage assistant evaluation ({MODEL}, local via Ollama)", "",
          f"- Cases: {len(r)} ({(r['sample']=='top_of_queue').sum()} from the top of the queue, {(r['sample']=='random').sum()} random alerts)",
          f"- Valid on first try: {(r.attempts==1).mean():.0%}; valid after one retry: {(r.status!='FALLBACK_TEMPLATE').mean():.0%}; fallback template used: {(r.status=='FALLBACK_TEMPLATE').mean():.0%}",
-         f"- Signals in the risk_signals list outside the case's reason codes: 0 by construction (rejected by the grounding check); flags in the note text are not checked (see note_audit.md)",
+         f"- Signals or note-text flags outside the case's reason codes shown to investigators: 0 by construction (rejected by the grounding check; see note_audit.md)",
          f"- Assistant suggested plain approval on a HIGH-score case (sent to senior review): {(r.status=='ASSISTANT_SUGGESTS_APPROVAL_ON_HIGH_SCORE_SENIOR_REVIEW').mean():.0%}",
          f"- Median latency per case: {r.latency_s.median():.1f}s on an Apple M4 Mac mini", "",
          "| Priority (from risk score) | Cases | Actual fraud rate |", "|---|---|---|"]
