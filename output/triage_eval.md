@@ -2,7 +2,7 @@
 
 - Cases: 250 (150 from the top of the queue, 100 random alerts)
 - Valid on first try: 98%; valid after one retry: 98%; fallback template used: 2%
-- Ungrounded (invented) signals shipped to investigators: 0 by construction (rejected by the grounding check)
+- Signals in the risk_signals list outside the case's reason codes: 0 by construction (rejected by the grounding check); flags in the note text are not checked (see note_audit.md)
 - Assistant suggested plain approval on a HIGH-score case (sent to senior review): 0%
 - Median latency per case: 4.4s on an Apple M4 Mac mini
 

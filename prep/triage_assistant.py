@@ -6,8 +6,9 @@ a human approves or overrides, and every step is logged for audit.
 
 Guardrails
   * JSON-only output validated against a fixed schema (one retry, then a deterministic fallback).
-  * Grounding check: every risk signal the LLM cites must come from the case's own reason codes,
-    so it cannot invent facts. Ungrounded output is rejected.
+  * Grounding check: every signal in the risk_signals list must come from the case's own reason codes,
+    and every number in the note must appear in the case data. Ungrounded output is rejected.
+    Flags written into the note text are not checked here; see prep/audit_notes.py.
   * Suggested checks must come from an approved list.
   * Consistency check: if the LLM's priority disagrees with the score band, the case is flagged
     for senior review instead of being silently accepted.
@@ -136,7 +137,7 @@ acc = r[r.status != "FALLBACK_TEMPLATE"]
 lines = [f"# Triage assistant evaluation ({MODEL}, local via Ollama)", "",
          f"- Cases: {len(r)} ({(r['sample']=='top_of_queue').sum()} from the top of the queue, {(r['sample']=='random').sum()} random alerts)",
          f"- Valid on first try: {(r.attempts==1).mean():.0%}; valid after one retry: {(r.status!='FALLBACK_TEMPLATE').mean():.0%}; fallback template used: {(r.status=='FALLBACK_TEMPLATE').mean():.0%}",
-         f"- Ungrounded (invented) signals shipped to investigators: 0 by construction (rejected by the grounding check)",
+         f"- Signals in the risk_signals list outside the case's reason codes: 0 by construction (rejected by the grounding check); flags in the note text are not checked (see note_audit.md)",
          f"- Assistant suggested plain approval on a HIGH-score case (sent to senior review): {(r.status=='ASSISTANT_SUGGESTS_APPROVAL_ON_HIGH_SCORE_SENIOR_REVIEW').mean():.0%}",
          f"- Median latency per case: {r.latency_s.median():.1f}s on an Apple M4 Mac mini", "",
          "| Priority (from risk score) | Cases | Actual fraud rate |", "|---|---|---|"]
